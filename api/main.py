@@ -17,7 +17,7 @@ def hello_http(request):
     """
 
     # Get a reference to the GCS bucket and folder
-    bucket_name = "aos-demo-toolkit"  # Replace with your bucket name
+    bucket_name = "operative-connect-lite"  # Replace with your bucket name
     folder_name = "requests"
     storage_client = storage.Client()
     bucket = storage_client.bucket(bucket_name)
@@ -55,9 +55,7 @@ def hello_http(request):
 
         # Define a dictionary mapping function names to modules
         functions = {
-            "inventory": "inventory.main",  # Module name and function name
-            "advertisers": "advertisers.main",
-            "orders": "orders.main"
+            "organizations": "organizations.main"
         }
 
         # Import the corresponding module dynamically
