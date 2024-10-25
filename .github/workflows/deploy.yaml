@@ -23,7 +23,7 @@ jobs:
         with:
           project_id: ${{ secrets.GCP_PROJECT }}
 
-      - name: Deploy to Cloud Run
+      - name: Deploy API service to Cloud Run
         run: |
           gcloud functions deploy api \
             --gen2 \
@@ -31,6 +31,18 @@ jobs:
             --region us-central1 \
             --source=./api \
             --entry-point=hello_http \
+            --trigger-http \
+            --allow-unauthenticated \
+            --service-account=cloud-build@${{ secrets.GCP_PROJECT }}.iam.gserviceaccount.com
+
+      - name: Deploy UI service to Cloud Run
+        run: |
+          gcloud functions deploy api \
+            --gen2 \
+            --runtime=python312 \
+            --region us-central1 \
+            --source=./ui \
+            --entry-point=app \
             --trigger-http \
             --allow-unauthenticated \
             --service-account=cloud-build@${{ secrets.GCP_PROJECT }}.iam.gserviceaccount.com
