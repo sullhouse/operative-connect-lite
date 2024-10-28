@@ -10,3 +10,4 @@ __pycache__/orders.cpython-312.pyc
 __pycache__/delivery.cpython-312.pyc
 local_credentials.json
 operative-connect-lite-41ee5442dc06.json
+ui/__pycache__

@@ -37,7 +37,7 @@ jobs:
 
       - name: Deploy UI service to Cloud Run
         run: |
-          gcloud functions deploy api \
+          gcloud functions deploy ui \
             --gen2 \
             --runtime=python312 \
             --region us-central1 \
