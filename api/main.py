@@ -64,7 +64,7 @@ def hello_http(request):
             imported_module = __import__(module_name)
             function = getattr(imported_module, function_name)
             # Call the function with the request
-            response = function(request)
+            response, status_code = function(request)
 
             folder_name = "responses"
 
@@ -83,7 +83,7 @@ def hello_http(request):
                 return error_response
 
             # Return the response as JSON
-            json_response = Response(json.dumps(response), status=200, mimetype='application/json')
+            json_response = Response(json.dumps(response), status=status_code, mimetype='application/json')
             return json_response
         else:
             error_response = Response(json.dumps({"error": "Function not found"}), status=404, mimetype='application/json')
