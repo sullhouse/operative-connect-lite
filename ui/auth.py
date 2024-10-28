@@ -84,7 +84,8 @@ def protected(request):
         return {"message": "Token is missing"}, 401
 
     try:
-        data = jwt.decode(token, os.environ.get('SECRET_KEY', 'default_secret_key'), algorithms=["HS256"])
+        secret_key = get_secret('SECRET_KEY')
+        data = jwt.decode(token, secret_key, algorithms=["HS256"])
         current_user = data['username']
     except:
         return {"message": "Token is invalid"}, 401
