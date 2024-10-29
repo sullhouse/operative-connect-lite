@@ -1,10 +1,16 @@
 import functions_framework
-from flask import Response
+from flask import Response, Flask
 from google.cloud import storage
 import json
 import datetime
 import uuid
+from werkzeug.security import generate_password_hash, check_password_hash
+import jwt
+import datetime
+import os
 
+app = Flask(__name__)
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default_secret_key')
 @functions_framework.http
 def hello_http(request):
     """Main Cloud Function that saves the request to a file and dispatches requests based on the URL path.
@@ -51,11 +57,14 @@ def hello_http(request):
         )
 
         # Get the function name from the request URL
-        function_name = request.path.split("/")[-1]
+        function_name = request.path.lstrip("/").split("?")[0]
 
         # Define a dictionary mapping function names to modules
         functions = {
-            "organizations": "organizations.main"
+            "organizations": "organizations.main",
+            "auth/register": "auth.register",
+            "auth/login": "auth.login",
+            "auth/protected": "auth.protected"
         }
 
         # Import the corresponding module dynamically
