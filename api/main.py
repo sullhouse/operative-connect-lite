@@ -1,17 +1,20 @@
 import functions_framework
 from flask import Response, Flask
+from flask_cors import CORS, cross_origin
 from google.cloud import storage
 import json
 import datetime
 import uuid
 from werkzeug.security import generate_password_hash, check_password_hash
-import jwt
 import datetime
 import os
 
 app = Flask(__name__)
+CORS(app)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default_secret_key')
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = 'operative-connect-lite-41ee5442dc06.json'
 @functions_framework.http
+@cross_origin()
 def hello_http(request):
     """Main Cloud Function that saves the request to a file and dispatches requests based on the URL path.
 

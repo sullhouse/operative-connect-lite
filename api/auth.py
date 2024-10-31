@@ -1,11 +1,19 @@
-import json
 import os
-from flask import Response, request
+from flask import Flask, make_response
+from flask_cors import CORS, cross_origin
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 import datetime
 from google.cloud import secretmanager
 from google.cloud import bigquery
+
+# Set up CORS
+cors = CORS()
+
+# Initialize the Flask app
+app = Flask(__name__)
+cors.init_app(app)
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default_secret_key')
 
 # In-memory user storage
 users = {}
@@ -76,6 +84,10 @@ def login(request):
     token = jwt.encode({'username': username, 'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1)}, secret_key)
     return {"token": token}, 200
 
+def logout(request):
+    response = make_response({"message": "Logged out successfully"}, 200)
+    response.set_cookie('token', '', expires=0)
+    return response
 
 def protected(request):
     token = request.headers.get('x-access-token')

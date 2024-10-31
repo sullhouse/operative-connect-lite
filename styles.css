@@ -1,0 +1,204 @@
+/* Base Styling */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #F4F6F8;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+/* Header Styling */
+.header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #FFFFFF;
+    padding: 16px;
+    border-bottom: 1px solid #E0E0E0;
+}
+
+.header h1 {
+    font-size: 24px;
+    color: #333;
+    margin: 0;
+}
+
+/* Form Layout */
+.form-container {
+    padding: 24px;
+    max-width: 1200px;
+    margin: auto;
+    background-color: #FFFFFF;
+    border: 1px solid #E0E0E0;
+    border-radius: 8px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 4px;
+}
+
+.form-group input,
+.form-group select {
+    font-size: 14px;
+    padding: 8px;
+    border: 1px solid #CCCCCC;
+    border-radius: 4px;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: #6A1B9A;
+}
+
+.form-group input[type="date"] {
+    color: #333;
+}
+
+.form-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+/* Section Header */
+.section-header {
+    font-size: 18px;
+    font-weight: bold;
+    color: #6A1B9A;
+    margin-bottom: 16px;
+    border-bottom: 2px solid #E0E0E0;
+    padding-bottom: 8px;
+}
+
+/* Sub Header */
+.sub-header {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 16px;
+}
+
+/* Button Styles */
+.button-group {
+    display: flex;
+    gap: 8px;
+}
+
+.button-group button {
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.button-group .primary-button {
+    background-color: #6A1B9A;
+    color: #FFFFFF;
+}
+
+.button-group .secondary-button {
+    background-color: #E0E0E0;
+    color: #333;
+}
+
+.button-group .primary-button:hover {
+    background-color: #7E57C2;
+}
+
+.button-group .secondary-button:hover {
+    background-color: #D1D1D1;
+}
+
+/* Tables and List Styling */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+}
+
+.table th, .table td {
+    padding: 12px;
+    border: 1px solid #E0E0E0;
+    text-align: left;
+    font-size: 14px;
+}
+
+.table th {
+    background-color: #F4F4F4;
+    color: #333;
+}
+
+.table-row:hover {
+    background-color: #F9F9F9;
+}
+
+/* Custom Dropdowns */
+select {
+    appearance: none;
+    background: url('data:image/svg+xml;base64,...') no-repeat right 8px center;
+    background-color: #FFFFFF;
+    padding-right: 32px;
+}
+
+/* Checkbox and Radio Buttons */
+input[type="checkbox"], input[type="radio"] {
+    margin-right: 8px;
+}
+
+.checkbox-label, .radio-label {
+    font-size: 14px;
+    color: #555;
+}
+
+/* Tooltip */
+.tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip .tooltip-text {
+    visibility: hidden;
+    width: 200px;
+    background-color: #333;
+    color: #FFFFFF;
+    text-align: center;
+    border-radius: 4px;
+    padding: 8px;
+    position: absolute;
+    z-index: 1;
+    bottom: 100%;
+    left: 50%;
+    margin-left: -100px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.tooltip:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+    .form-row {
+        flex-direction: column;
+    }
+
+    .button-group {
+        flex-direction: column;
+    }
+}
