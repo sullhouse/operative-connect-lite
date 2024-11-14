@@ -83,16 +83,25 @@ def login(request):
     return {"token": token}, 200
 
 def protected(request):
-    headers = request.headers if hasattr(request, 'headers') else request.get('headers', {})
-    token = headers.get('x-access-token')
+    # Debug request headers
+    print("Request headers:", request.headers if hasattr(request, 'headers') else request.get('headers', {}))
+    
+    # Get token from headers
+    if hasattr(request, 'headers'):
+        token = request.headers.get('x-access-token')
+    else:
+        headers = request.get('headers', {})
+        token = headers.get('x-access-token')
 
     if not token:
         return {"message": "Token is missing"}, 401
 
     try:
-        data = jwt.decode(token, get_secret('SECRET_KEY'), algorithms=["HS256"])
+        secret_key = get_secret('SECRET_KEY')
+        data = jwt.decode(token, secret_key, algorithms=["HS256"])
         current_user = data['username']
-    except:
+    except Exception as e:
+        print("Token decode error:", str(e))
         return {"message": "Token is invalid"}, 401
 
     return {"message": f"Hello {current_user}, you are authorized to access this resource"}, 200
