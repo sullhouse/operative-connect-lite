@@ -1,5 +1,5 @@
 import os
-from flask import Flask, make_response
+from flask import Flask, make_response, jsonify
 from flask_cors import CORS, cross_origin
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
@@ -48,12 +48,12 @@ def register(request):
     password = data.get('password')
     
     if not username or not password:
-        return {"message": "Username and password are required"}, 400
+        return jsonify({"message": "Username and password are required"}), 400
 
     # Check if the username already exists
     existing_username, _ = get_user_credentials(username)
     if existing_username:
-        return {"message": "Username already exists"}, 400
+        return jsonify({"message": "Username already exists"}), 400
     
     hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
     
@@ -65,9 +65,9 @@ def register(request):
     ]
     errors = client.insert_rows_json(table_id, rows_to_insert)
     if errors:
-        return {"message": "Failed to register user"}, 500
+        return jsonify({"message": "Failed to register user"}), 500
 
-    return {"message": "User registered successfully"}, 200
+    return jsonify({"message": "User registered successfully"}), 200
 
 @cross_origin(origins="http://ocl.sullhouse.com")
 def login(request):
@@ -84,7 +84,7 @@ def login(request):
 
     secret_key = get_secret('SECRET_KEY')
     token = jwt.encode({'username': username, 'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1)}, secret_key)
-    return {"token": token}, 200
+    return jsonify({"token": token}), 200
 
 @cross_origin(origins="http://ocl.sullhouse.com")
 def logout(request):
