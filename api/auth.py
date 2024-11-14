@@ -36,8 +36,16 @@ def get_user_credentials(username):
         return row.username, row.hashed_password
     return None, None
 
+def get_request_data(request_obj):
+    """Helper function to get JSON data from either Flask request or dict-like object"""
+    if hasattr(request_obj, 'get_json'):
+        return request_obj.get_json()
+    elif isinstance(request_obj, dict):
+        return request_obj.get('body', {})
+    return {}
+
 def register(request):
-    data = request.get_json()
+    data = get_request_data(request)
     username = data.get('username')
     password = data.get('password')
 
@@ -59,7 +67,7 @@ def register(request):
     return {"message": "User registered successfully"}, 200
 
 def login(request):
-    data = request.get_json()
+    data = get_request_data(request)
     username = data.get('username')
     password = data.get('password')
 
@@ -75,7 +83,8 @@ def login(request):
     return {"token": token}, 200
 
 def protected(request):
-    token = request.headers.get('x-access-token')
+    headers = request.headers if hasattr(request, 'headers') else request.get('headers', {})
+    token = headers.get('x-access-token')
 
     if not token:
         return {"message": "Token is missing"}, 401
