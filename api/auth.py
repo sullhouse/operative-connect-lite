@@ -1,6 +1,6 @@
 import os
-from flask import Flask, request, make_response
-from flask_cors import CORS, cross_origin
+from flask import Flask, make_response
+from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 import datetime
@@ -110,6 +110,26 @@ def logout(request):
     response = make_response({"message": "Logged out successfully"}, 200)
     response.set_cookie('token', '', expires=0)
     return response
+
+def authorized(request):
+    """Check if the request is authenticated based on the token in headers"""
+    # Get token from headers
+    if hasattr(request, 'headers'):
+        token = request.headers.get('x-access-token')
+    else:
+        headers = request.get('headers', {})
+        token = headers.get('x-access-token')
+
+    if not token:
+        return False
+
+    try:
+        secret_key = get_secret('SECRET_KEY')
+        jwt.decode(token, secret_key, algorithms=["HS256"])
+        return True
+    except Exception as e:
+        print("Token decode error:", str(e))
+        return False
 
 if __name__ == '__main__':
     app.run(debug=True)

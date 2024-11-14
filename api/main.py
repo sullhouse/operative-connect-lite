@@ -62,10 +62,13 @@ def hello_http(request):
 
         # Define a dictionary mapping function names to modules
         functions = {
-            "organizations": "organizations.main",
-            "auth/register": "auth.register",
+            "auth/register": "auth.register", 
             "auth/login": "auth.login",
-            "auth/protected": "auth.protected"
+            "auth/protected": "auth.protected",
+            "organizations/create": "organizations.create_organization",
+            "organizations/list": "organizations.list_organizations",
+            "organizations/partnerships/create": "organizations.create_partnership",
+            "organizations/partnerships/list": "organizations.list_partnerships"
         }
 
         # Import the corresponding module dynamically
