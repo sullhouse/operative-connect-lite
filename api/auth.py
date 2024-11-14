@@ -24,7 +24,6 @@ def get_secret(secret_id):
 
 def get_user_credentials(username):
     bigquery_client = bigquery.Client()
-    
     query = f"""
         SELECT username, hashed_password
         FROM `{project_id}.users.users`
@@ -35,11 +34,8 @@ def get_user_credentials(username):
 
     for row in results:
         return row.username, row.hashed_password
-
     return None, None
 
-@app.route('/api/register', methods=['POST'])
-@cross_origin(origins="http://ocl.sullhouse.com")
 def register(request):
     data = request.get_json()
     username = data.get('username')
@@ -62,8 +58,6 @@ def register(request):
 
     return {"message": "User registered successfully"}, 200
 
-@app.route('/api/login', methods=['POST'])
-@cross_origin(origins="http://ocl.sullhouse.com")
 def login(request):
     data = request.get_json()
     username = data.get('username')
@@ -80,8 +74,6 @@ def login(request):
     token = jwt.encode({'username': username, 'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1)}, secret_key)
     return {"token": token}, 200
 
-@app.route('/api/protected', methods=['GET'])
-@cross_origin(origins="http://ocl.sullhouse.com")
 def protected(request):
     token = request.headers.get('x-access-token')
 
@@ -96,9 +88,7 @@ def protected(request):
 
     return {"message": f"Hello {current_user}, you are authorized to access this resource"}, 200
 
-@app.route('/api/logout', methods=['POST'])
-@cross_origin(origins="http://ocl.sullhouse.com")
-def logout():
+def logout(request):
     response = make_response({"message": "Logged out successfully"}, 200)
     response.set_cookie('token', '', expires=0)
     return response
