@@ -3,5 +3,6 @@ google-cloud-storage
 google-cloud-bigquery
 google-cloud-secret-manager
 Flask==2.1.1
+flask-cors==3.0.10
 Werkzeug==2.1.1
 PyJWT==2.3.0
