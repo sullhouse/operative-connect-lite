@@ -88,8 +88,17 @@ def hello_http(request):
                 # Construct the full path within the bucket
                 blob = bucket.blob(f"{folder_name}/{filename}")
 
-                # Upload the entire request data in a readable format
-                blob.upload_from_string(json.dumps(response, indent=2))
+                response_data = {
+                    "path": response.path,
+                    "headers": dict(response.headers),
+                    "json": response.json
+                }
+
+                # Upload the entire response data in a readable format
+                blob.upload_from_string(
+                    data=json.dumps(response_data),
+                    content_type='application/json'
+                )
             except Exception as e:
                 error_response = Response(json.dumps({"error": str(e)}), status=500, mimetype='application/json')
                 return error_response
