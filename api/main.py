@@ -33,9 +33,6 @@ def hello_http(request):
 
     # Extract data from the request and save in readable format
     try:
-        # Get the JSON data
-        request_json = request.get_json()
-
         # Generate a timestamp for the filename
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         short_uuid = str(uuid.uuid4())[:8]
@@ -48,9 +45,10 @@ def hello_http(request):
 
         # Create a dictionary to hold the entire request data
         request_data = {
-            "path": request.path,
-            "headers": dict(request.headers),
-            "json": request_json
+            'path': request.path,
+            'method': request.method,
+            'headers': dict(request.headers),
+            'body': request.get_json() if request.is_json else None
         }
 
         # Save the request data to the GCS bucket
