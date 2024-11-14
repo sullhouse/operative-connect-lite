@@ -88,10 +88,10 @@ def hello_http(request):
                 # Construct the full path within the bucket
                 blob = bucket.blob(f"{folder_name}/{filename}")
 
+                # Create response data using the dictionary part of the response
                 response_data = {
-                    "path": response.path,
-                    "headers": dict(response.headers),
-                    "json": response.json
+                    "status_code": status_code,
+                    "data": response
                 }
 
                 # Upload the entire response data in a readable format
