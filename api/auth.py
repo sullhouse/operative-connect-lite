@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, make_response, jsonify
+from flask import Flask, request, make_response
 from flask_cors import CORS, cross_origin
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
@@ -40,7 +40,7 @@ def get_user_credentials(username):
 
 @app.route('/api/register', methods=['POST'])
 @cross_origin(origins="http://ocl.sullhouse.com")
-def register():
+def register(request):
     data = request.get_json()
     username = data.get('username')
     password = data.get('password')
@@ -64,7 +64,7 @@ def register():
 
 @app.route('/api/login', methods=['POST'])
 @cross_origin(origins="http://ocl.sullhouse.com")
-def login():
+def login(request):
     data = request.get_json()
     username = data.get('username')
     password = data.get('password')
@@ -82,7 +82,7 @@ def login():
 
 @app.route('/api/protected', methods=['GET'])
 @cross_origin(origins="http://ocl.sullhouse.com")
-def protected():
+def protected(request):
     token = request.headers.get('x-access-token')
 
     if not token:
