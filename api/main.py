@@ -5,16 +5,15 @@ from google.cloud import storage
 import json
 import datetime
 import uuid
-from werkzeug.security import generate_password_hash, check_password_hash
 import datetime
 import os
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "http://ocl.sullhouse.com"}})
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default_secret_key')
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = 'operative-connect-lite-41ee5442dc06.json'
 @functions_framework.http
-@cross_origin()
+@cross_origin(origins="http://ocl.sullhouse.com")
 def hello_http(request):
     """Main Cloud Function that saves the request to a file and dispatches requests based on the URL path.
 
@@ -26,7 +25,7 @@ def hello_http(request):
     """
 
     # Get a reference to the GCS bucket and folder
-    bucket_name = "operative-connect-lite"  # Replace with your bucket name
+    bucket_name = "operative-connect-lite"
     folder_name = "requests"
     storage_client = storage.Client()
     bucket = storage_client.bucket(bucket_name)
