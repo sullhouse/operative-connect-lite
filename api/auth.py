@@ -12,7 +12,7 @@ cors = CORS()
 
 # Initialize the Flask app
 app = Flask(__name__)
-cors.init_app(app)
+CORS(app, resources={r"/*": {"origins": "http://ocl.sullhouse.com"}})
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default_secret_key')
 
 # In-memory user storage
@@ -41,6 +41,7 @@ def get_user_credentials(username):
 
     return None, None
 
+@cross_origin(origins="http://ocl.sullhouse.com")
 def register(request):
     data = request.get_json()
     username = data.get('username')
@@ -68,6 +69,7 @@ def register(request):
 
     return {"message": "User registered successfully"}, 200
 
+@cross_origin(origins="http://ocl.sullhouse.com")
 def login(request):
     data = request.get_json()
     username = data.get('username')
@@ -84,11 +86,13 @@ def login(request):
     token = jwt.encode({'username': username, 'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1)}, secret_key)
     return {"token": token}, 200
 
+@cross_origin(origins="http://ocl.sullhouse.com")
 def logout(request):
     response = make_response({"message": "Logged out successfully"}, 200)
     response.set_cookie('token', '', expires=0)
     return response
 
+@cross_origin(origins="http://ocl.sullhouse.com")
 def protected(request):
     token = request.headers.get('x-access-token')
 
