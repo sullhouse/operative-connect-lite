@@ -54,7 +54,6 @@ document.getElementById('protected-button').addEventListener('click', async func
     const response = await fetch(`${apiDomain}/auth/protected`, {
         method: 'GET',
         headers: {
-            'Content-Type': 'application/json',
             'x-access-token': token
         }
     });
