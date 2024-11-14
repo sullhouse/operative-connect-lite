@@ -11,7 +11,8 @@ import os
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "http://ocl.sullhouse.com"}})
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default_secret_key')
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = 'operative-connect-lite-41ee5442dc06.json'
+
+# For local testing provide credentials: os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = 'operative-connect-lite-41ee5442dc06.json'
 @functions_framework.http
 @cross_origin(origins="http://ocl.sullhouse.com")
 def hello_http(request):
