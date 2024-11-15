@@ -5,5 +5,5 @@ google-cloud-secret-manager
 Flask==2.1.1
 flask-cors==3.0.10
 Werkzeug==2.1.1
-PyJWT==2.3.0
-flask-limiter==2.0.5
+PyJWT==2.1.0  # Updated to a compatible version
+flask-limiter==1.5  # Updated to a compatible version

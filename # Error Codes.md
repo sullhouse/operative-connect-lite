@@ -93,3 +93,8 @@ This document lists and describes all the standardized error codes used across t
 - **Code:** `SERVICE_UNAVAILABLE`
 - **Message:** Service unavailable
 - **Description:** The service is temporarily unavailable. Please try again later.
+
+### TOKEN_REFRESH_ERROR
+- **Code:** `TOKEN_REFRESH_ERROR`
+- **Message:** Token refresh error
+- **Description:** An error occurred while refreshing the JWT token.
