@@ -13,11 +13,7 @@ from flask_limiter.util import get_remote_address
 app = Flask(__name__)
 
 # Define allowed origins
-ALLOWED_ORIGINS = [
-    "http://ocl.sullhouse.com",      # Production
-    "http://localhost:5000",         # Local development
-    "http://127.0.0.1:5000"         # Local development alternative
-]
+ALLOWED_ORIGINS = os.environ.get('ALLOWED_ORIGINS', "http://ocl.sullhouse.com,http://localhost:5000,http://127.0.0.1:5000").split(',')
 
 # Configure CORS with specific origins and options
 CORS(app, resources={
@@ -35,7 +31,7 @@ project_id = os.environ.get('GCP_PROJECT')
 limiter = Limiter(
     get_remote_address,
     app=app,
-    default_limits=["200 per day", "50 per hour"]
+    default_limits=[os.environ.get('RATE_LIMITS', "200 per day,50 per hour")]
 )
 
 # Token blacklist
@@ -245,7 +241,7 @@ def authorized(request):
         print("Token decode error:", str(e))
         return False
 
-@limiter.limit("5 per minute")
+@limiter.limit(os.environ.get('REFRESH_RATE_LIMIT', "5 per minute"))
 def refresh(request):
     # Validate token in headers
     token = request.headers.get('x-access-token')
@@ -281,4 +277,4 @@ def cleanup_expired_tokens():
     blacklisted_tokens.difference_update(expired_tokens)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=os.environ.get('FLASK_DEBUG', 'False') == 'True')

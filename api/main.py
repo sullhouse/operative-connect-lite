@@ -10,11 +10,7 @@ import os
 app = Flask(__name__)
 
 # Define allowed origins
-ALLOWED_ORIGINS = [
-    "http://ocl.sullhouse.com",      # Production
-    "http://localhost:5000",         # Local development
-    "http://127.0.0.1:5000"         # Local development alternative
-]
+ALLOWED_ORIGINS = os.environ.get('ALLOWED_ORIGINS', "http://ocl.sullhouse.com,http://localhost:5000,http://127.0.0.1:5000").split(',')
 
 # Configure CORS with specific origins and options
 CORS(app, resources={
@@ -129,3 +125,6 @@ def hello_http(request):
     except Exception as e:
         error_response = Response(json.dumps({"error": {"code": "INTERNAL_ERROR", "message": str(e)}}), status=500, mimetype='application/json')
         return error_response
+
+if __name__ == '__main__':
+    app.run(debug=os.environ.get('FLASK_DEBUG', 'False') == 'True')
