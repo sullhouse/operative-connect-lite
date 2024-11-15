@@ -1,12 +1,13 @@
 import os
 import re
-from flask import Flask, make_response
+from flask import Flask, make_response, request
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 import datetime
-from google.cloud import secretmanager
-from google.cloud import bigquery
+from google.cloud import secretmanager, bigquery
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 # Initialize the Flask app
 app = Flask(__name__)
@@ -29,6 +30,16 @@ CORS(app, resources={
 
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default_secret_key')
 project_id = os.environ.get('GCP_PROJECT')
+
+# Initialize rate limiter
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["200 per day", "50 per hour"]
+)
+
+# Token blacklist
+blacklisted_tokens = set()
 
 def validate_username(username):
     """Validate username format and length"""
@@ -69,6 +80,9 @@ def validate_token(token):
     """Validate JWT token format"""
     if not token or not isinstance(token, str):
         return False, "Token is required and must be a string"
+    
+    if token in blacklisted_tokens:
+        return False, "Token has been blacklisted"
     
     try:
         jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
@@ -204,6 +218,9 @@ def protected(request):
         return {"error": {"code": "TOKEN_VALIDATION_ERROR", "message": f"Token validation error: {str(e)}"}}, 401
 
 def logout(request):
+    token = request.headers.get('x-access-token')
+    if token:
+        blacklisted_tokens.add(token)
     response = make_response({"message": "Logged out successfully"}, 200)
     response.set_cookie('token', '', expires=0)
     return response
@@ -228,6 +245,7 @@ def authorized(request):
         print("Token decode error:", str(e))
         return False
 
+@limiter.limit("5 per minute")
 def refresh(request):
     # Validate token in headers
     token = request.headers.get('x-access-token')
@@ -255,6 +273,12 @@ def refresh(request):
         return {"token": new_token}, 200
     except Exception as e:
         return {"error": {"code": "TOKEN_REFRESH_ERROR", "message": f"Token refresh error: {str(e)}"}}, 401
+
+def cleanup_expired_tokens():
+    """Cleanup expired tokens from the blacklist"""
+    current_time = datetime.datetime.utcnow()
+    expired_tokens = {token for token in blacklisted_tokens if jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"], options={"verify_exp": False})['exp'] < current_time}
+    blacklisted_tokens.difference_update(expired_tokens)
 
 if __name__ == '__main__':
     app.run(debug=True)
