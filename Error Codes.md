@@ -83,3 +83,13 @@ This document lists and describes all the standardized error codes used across t
 - **Code:** `TOKEN_VALIDATION_ERROR`
 - **Message:** Token validation error
 - **Description:** An error occurred while validating the JWT token.
+
+### RATE_LIMIT_EXCEEDED
+- **Code:** `RATE_LIMIT_EXCEEDED`
+- **Message:** Rate limit exceeded
+- **Description:** The request rate limit has been exceeded. Please try again later.
+
+### SERVICE_UNAVAILABLE
+- **Code:** `SERVICE_UNAVAILABLE`
+- **Message:** Service unavailable
+- **Description:** The service is temporarily unavailable. Please try again later.

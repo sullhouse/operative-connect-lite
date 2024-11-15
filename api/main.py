@@ -80,6 +80,7 @@ def hello_http(request):
             "auth/register": "auth.register", 
             "auth/login": "auth.login",
             "auth/protected": "auth.protected",
+            "auth/refresh": "auth.refresh",  # Add this line
             "organizations/create": "organizations.create_organization",
             "organizations/list": "organizations.list_organizations",
             "organizations/partnerships/create": "organizations.create_partnership",

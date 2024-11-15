@@ -46,6 +46,29 @@ function validatePassword(password) {
     return { valid: true };
 }
 
+async function refreshToken() {
+    const token = getCookie('token');
+    if (!token) {
+        alert('No token found. Please log in first.');
+        return;
+    }
+
+    const response = await fetch(`${apiDomain}/auth/refresh`, {
+        method: 'POST',
+        headers: {
+            'x-access-token': token
+        }
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+        document.cookie = `token=${data.token}; path=/`;
+        alert('Token refreshed successfully!');
+    } else {
+        alert(data.message);
+    }
+}
+
 document.getElementById('login-form').addEventListener('submit', async function(event) {
     event.preventDefault();
     const username = document.getElementById('login-username').value;

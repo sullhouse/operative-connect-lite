@@ -228,5 +228,33 @@ def authorized(request):
         print("Token decode error:", str(e))
         return False
 
+def refresh(request):
+    # Validate token in headers
+    token = request.headers.get('x-access-token')
+    is_valid, error = validate_token(token)
+    if not is_valid:
+        return {"error": {"code": "INVALID_TOKEN", "message": error}}, 401
+
+    try:
+        data = jwt.decode(token, get_secret('SECRET_KEY'), algorithms=["HS256"], options={"verify_exp": False})
+        current_user = data['username']
+
+        # Validate extracted username
+        is_valid, error = validate_username(current_user)
+        if not is_valid:
+            return {"error": {"code": "INVALID_USERNAME", "message": "Invalid username in token"}}, 401
+
+        # Generate new token
+        new_token = jwt.encode(
+            {
+                'username': current_user,
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+            },
+            get_secret('SECRET_KEY')
+        )
+        return {"token": new_token}, 200
+    except Exception as e:
+        return {"error": {"code": "TOKEN_REFRESH_ERROR", "message": f"Token refresh error: {str(e)}"}}, 401
+
 if __name__ == '__main__':
     app.run(debug=True)
