@@ -2,7 +2,7 @@ import re
 import uuid
 import jwt
 from flask import request
-from .secrets import get_secret  # Updated import
+from api.secrets import get_secret  # Updated import
 import auth
 
 def validate_organization_name(name):

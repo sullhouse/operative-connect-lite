@@ -8,8 +8,8 @@ import datetime
 from google.cloud import bigquery
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from .utils import validate_username, validate_password, validate_token, validate_request_data
-from .secrets import get_secret  # Updated import
+from api.utils import validate_username, validate_password, validate_token, validate_request_data
+from api.secrets import get_secret  # Updated import
 
 # Initialize the Flask app
 app = Flask(__name__)
