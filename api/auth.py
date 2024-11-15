@@ -29,7 +29,7 @@ project_id = os.environ.get('GCP_PROJECT')
 
 # Initialize rate limiter
 limiter = Limiter(
-    get_remote_address,
+    key_func=get_remote_address,
     app=app,
     default_limits=[os.environ.get('RATE_LIMITS', "200 per day,50 per hour")]
 )
