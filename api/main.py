@@ -1,14 +1,15 @@
 import functions_framework
-from flask import Response, Flask
+from flask import Response, Flask, jsonify
 from flask_cors import CORS, cross_origin
 from google.cloud import storage
 import json
 import datetime
 import uuid
-import datetime
 import os
+from flasgger import Swagger
 
 app = Flask(__name__)
+swagger = Swagger(app)
 
 # Define allowed origins
 ALLOWED_ORIGINS = [
@@ -130,3 +131,7 @@ def hello_http(request):
     except Exception as e:
         error_response = Response(json.dumps({"error": {"code": "INTERNAL_ERROR", "message": str(e)}}), status=500, mimetype='application/json')
         return error_response
+
+@app.route('/swagger')
+def swagger_ui():
+    return jsonify(swagger(app))

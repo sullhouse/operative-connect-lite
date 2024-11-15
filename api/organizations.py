@@ -85,7 +85,32 @@ def get_organization_details(org_id):
     return None
 
 def create_organization(request):
-    """Create a new organization and map user to it"""
+    """
+    Create a new organization and map user to it.
+    ---
+    tags:
+      - Organizations
+    parameters:
+      - in: body
+        name: body
+        schema:
+          type: object
+          required:
+            - organization_name
+          properties:
+            organization_name:
+              type: string
+              description: The name of the organization to create.
+    responses:
+      200:
+        description: Organization created successfully
+      400:
+        description: Invalid request data
+      401:
+        description: Unauthorized
+      500:
+        description: Internal server error
+    """
     username = get_user_from_token(request)
     if not username:
         return {"error": {"code": "UNAUTHORIZED", "message": "Unauthorized"}}, 401
@@ -140,7 +165,17 @@ def create_organization(request):
     return {"message": "Organization created successfully", "organization_id": org_id}, 200
 
 def list_organizations(request):
-    """List organizations user has access to"""
+    """
+    List organizations user has access to.
+    ---
+    tags:
+      - Organizations
+    responses:
+      200:
+        description: List of organizations
+      401:
+        description: Unauthorized
+    """
     username = get_user_from_token(request)
     if not username:
         return {"message": "Unauthorized"}, 401
@@ -240,14 +275,25 @@ def create_partnership(request):
     return {"message": "Partnership created successfully", "partnership_id": partnership_id}, 200
 
 def list_partnerships(request):
-    """List partnerships for organizations user has access to"""
+    """List partnerships for organizations user has access to (distinct)
+    ---
+    tags:
+      - Organizations
+    responses:
+      200:
+        description: List of partnerships
+      401:
+        description: Unauthorized
+      500:
+        description: Internal server error
+    """
     username = get_user_from_token(request)
     if not username:
         return {"message": "Unauthorized"}, 401
 
     client = bigquery.Client()
     query = f"""
-        SELECT 
+        SELECT DISTINCT
             p.partnership_id,
             d.organization_id as demand_org_id,
             d.organization_name as demand_org_name,
@@ -259,7 +305,7 @@ def list_partnerships(request):
             s.created_at as supply_org_created_at
         FROM `{project_id}.organizations.partnerships` p
         JOIN `{project_id}.organizations.organizations` d ON p.demand_org_id = d.organization_id
-        JOIN `{project_id}.organizations.organizations` s ON p.supply_org_id = s.organization_id  # Updated join condition
+        JOIN `{project_id}.organizations.organizations` s ON p.supply_org_id = s.organization_id
         JOIN `{project_id}.users.user_organization` uo 
         ON uo.organization_id = d.organization_id OR uo.organization_id = s.organization_id
         WHERE uo.username = '{username}'
@@ -276,8 +322,8 @@ def list_partnerships(request):
                 'created_by': row.demand_org_created_by,
                 'created_at': row.demand_org_created_at.isoformat()
             },
-            'supply_organization': {  # Updated key name
-                'organization_id': row.supply_org_id,  # Updated field name
+            'supply_organization': {
+                'organization_id': row.supply_org_id,
                 'organization_name': row.supply_org_name,
                 'created_by': row.supply_org_created_by,
                 'created_at': row.supply_org_created_at.isoformat()

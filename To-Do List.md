@@ -29,9 +29,13 @@
 * ✅ CORS Security: Restricted CORS to specific domains
 * ✅ In-Memory Storage: Removed in favor of BigQuery storage
 * ✅ Error Handling: Improved error messages and validation feedback
+* ✅ Token Management: Implemented JWT token refresh mechanism
 
 ## Tech Debt
 * **SQL Injection Prevention:** Review and update BigQuery queries to use parameterized queries
-* **Token Refresh:** Implement JWT token refresh mechanism
+* **Token Security:** 
+    * Add token blacklisting for logged out tokens
+    * Implement token expiration cleanup
+    * Add rate limiting for token refresh
 * **Environment Variables:** Move all configuration to environment variables
 * **Code Organization:** Split large files into smaller, focused modules
