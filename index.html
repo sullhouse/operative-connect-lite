@@ -52,6 +52,22 @@
                 <button id="protected-button" class="primary-button">Call Protected Endpoint</button>
             </div>
         </div>
+        <div class="form-container" id="home-container" style="display: none;">
+            <h2 class="section-header">Home</h2>
+            <h3>Organizations</h3>
+            <ul id="organization-list"></ul>
+            <form id="add-organization-form">
+                <input type="text" id="new-organization-name" placeholder="New Organization Name" required>
+                <button type="submit" class="primary-button">Add Organization</button>
+            </form>
+            <h3>Partnerships</h3>
+            <ul id="partnership-list"></ul>
+            <form id="add-partnership-form">
+                <input type="text" id="demand-org-id" placeholder="Demand Organization ID" required>
+                <input type="text" id="supply-org-id" placeholder="Supply Organization ID" required>
+                <button type="submit" class="primary-button">Add Partnership</button>
+            </form>
+        </div>
     </div>
     <script src="scripts.js"></script>
 </body>

@@ -69,6 +69,123 @@ async function refreshToken() {
     }
 }
 
+async function fetchOrganizations() {
+    const token = getCookie('token');
+    if (!token) {
+        alert('No token found. Please log in first.');
+        return;
+    }
+
+    const response = await fetch(`${apiDomain}/organizations`, {
+        method: 'GET',
+        headers: {
+            'x-access-token': token
+        }
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+        displayOrganizations(data.organizations);
+    } else {
+        alert(data.message);
+    }
+}
+
+async function fetchPartnerships() {
+    const token = getCookie('token');
+    if (!token) {
+        alert('No token found. Please log in first.');
+        return;
+    }
+
+    const response = await fetch(`${apiDomain}/partnerships`, {
+        method: 'GET',
+        headers: {
+            'x-access-token': token
+        }
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+        displayPartnerships(data.partnerships);
+    } else {
+        alert(data.message);
+    }
+}
+
+function displayOrganizations(organizations) {
+    const orgList = document.getElementById('organization-list');
+    orgList.innerHTML = '';
+    organizations.forEach(org => {
+        const li = document.createElement('li');
+        li.textContent = `${org.organization_name} (Created by: ${org.created_by})`;
+        orgList.appendChild(li);
+    });
+}
+
+function displayPartnerships(partnerships) {
+    const partnershipList = document.getElementById('partnership-list');
+    partnershipList.innerHTML = '';
+    partnerships.forEach(partnership => {
+        const li = document.createElement('li');
+        li.textContent = `${partnership.demand_organization.organization_name} <-> ${partnership.supply_organization.organization_name}`;
+        partnershipList.appendChild(li);
+    });
+}
+
+document.getElementById('add-organization-form').addEventListener('submit', async function(event) {
+    event.preventDefault();
+    const orgName = document.getElementById('new-organization-name').value;
+
+    const response = await fetch(`${apiDomain}/organizations`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-access-token': getCookie('token')
+        },
+        body: JSON.stringify({ organization_name: orgName })
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+        alert('Organization created successfully!');
+        fetchOrganizations();
+    } else {
+        alert(data.message);
+    }
+});
+
+document.getElementById('add-partnership-form').addEventListener('submit', async function(event) {
+    event.preventDefault();
+    const demandOrgId = document.getElementById('demand-org-id').value;
+    const supplyOrgId = document.getElementById('supply-org-id').value;
+
+    const response = await fetch(`${apiDomain}/partnerships`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-access-token': getCookie('token')
+        },
+        body: JSON.stringify({ demand_org_id: demandOrgId, supply_org_id: supplyOrgId })
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+        alert('Partnership created successfully!');
+        fetchPartnerships();
+    } else {
+        alert(data.message);
+    }
+});
+
+function showHomeView() {
+    document.getElementById('login-container').style.display = 'none';
+    document.getElementById('register-container').style.display = 'none';
+    document.getElementById('home-container').style.display = 'block';
+    fetchOrganizations();
+    fetchPartnerships();
+}
+
 document.getElementById('login-form').addEventListener('submit', async function(event) {
     event.preventDefault();
     const username = document.getElementById('login-username').value;
@@ -100,6 +217,7 @@ document.getElementById('login-form').addEventListener('submit', async function(
     if (response.ok) {
         document.cookie = `token=${data.token}; path=/`;
         alert('Login successful!');
+        showHomeView();
     } else {
         alert(data.message);
     }

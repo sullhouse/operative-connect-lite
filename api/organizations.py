@@ -82,7 +82,6 @@ def create_organization(request):
     return {"message": "Organization created successfully", "organization_id": org_id}, 200
 
 def list_organizations(request):
-    # Remove Swagger documentation
     username = get_user_from_token(request)
     if not username:
         return {"message": "Unauthorized"}, 401
@@ -182,7 +181,6 @@ def create_partnership(request):
     return {"message": "Partnership created successfully", "partnership_id": partnership_id}, 200
 
 def list_partnerships(request):
-    """List partnerships for organizations user has access to (distinct)"""
     username = get_user_from_token(request)
     if not username:
         return {"message": "Unauthorized"}, 401
