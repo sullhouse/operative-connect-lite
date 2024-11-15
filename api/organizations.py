@@ -85,32 +85,7 @@ def get_organization_details(org_id):
     return None
 
 def create_organization(request):
-    """
-    Create a new organization and map user to it.
-    ---
-    tags:
-      - Organizations
-    parameters:
-      - in: body
-        name: body
-        schema:
-          type: object
-          required:
-            - organization_name
-          properties:
-            organization_name:
-              type: string
-              description: The name of the organization to create.
-    responses:
-      200:
-        description: Organization created successfully
-      400:
-        description: Invalid request data
-      401:
-        description: Unauthorized
-      500:
-        description: Internal server error
-    """
+    # Remove Swagger documentation
     username = get_user_from_token(request)
     if not username:
         return {"error": {"code": "UNAUTHORIZED", "message": "Unauthorized"}}, 401
@@ -165,17 +140,7 @@ def create_organization(request):
     return {"message": "Organization created successfully", "organization_id": org_id}, 200
 
 def list_organizations(request):
-    """
-    List organizations user has access to.
-    ---
-    tags:
-      - Organizations
-    responses:
-      200:
-        description: List of organizations
-      401:
-        description: Unauthorized
-    """
+    # Remove Swagger documentation
     username = get_user_from_token(request)
     if not username:
         return {"message": "Unauthorized"}, 401

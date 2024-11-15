@@ -114,34 +114,6 @@ def get_user_credentials(username):
     return None, None
 
 def register(request):
-    """
-    Register a new user.
-    ---
-    tags:
-      - Authentication
-    parameters:
-      - in: body
-        name: body
-        schema:
-          type: object
-          required:
-            - username
-            - password
-          properties:
-            username:
-              type: string
-              description: The username for the new user.
-            password:
-              type: string
-              description: The password for the new user.
-    responses:
-      201:
-        description: User registered successfully
-      400:
-        description: Invalid request data
-      500:
-        description: Internal server error
-    """
     # Validate request format
     data, error = validate_request_data(request)
     if error:
@@ -178,34 +150,6 @@ def register(request):
     return {"message": "User registered successfully"}, 201
 
 def login(request):
-    """
-    Log in a user.
-    ---
-    tags:
-      - Authentication
-    parameters:
-      - in: body
-        name: body
-        schema:
-          type: object
-          required:
-            - username
-            - password
-          properties:
-            username:
-              type: string
-              description: The username of the user.
-            password:
-              type: string
-              description: The password of the user.
-    responses:
-      200:
-        description: User logged in successfully
-      400:
-        description: Invalid request data
-      401:
-        description: Invalid credentials
-    """
     # Validate request format
     data, error = validate_request_data(request)
     if error:
@@ -285,17 +229,6 @@ def authorized(request):
         return False
 
 def refresh(request):
-    """
-    Refresh the JWT token.
-    ---
-    tags:
-      - Authentication
-    responses:
-      200:
-        description: Token refreshed successfully
-      401:
-        description: Invalid token
-    """
     # Validate token in headers
     token = request.headers.get('x-access-token')
     is_valid, error = validate_token(token)
