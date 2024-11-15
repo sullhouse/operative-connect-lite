@@ -8,6 +8,7 @@ import datetime
 from google.cloud import secretmanager, bigquery
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from utils import validate_username, validate_password, validate_token, validate_request_data
 
 # Initialize the Flask app
 app = Flask(__name__)
@@ -29,79 +30,13 @@ project_id = os.environ.get('GCP_PROJECT')
 
 # Initialize rate limiter
 limiter = Limiter(
-    key_func=get_remote_address,
+    get_remote_address,
     app=app,
     default_limits=[os.environ.get('RATE_LIMITS', "200 per day,50 per hour")]
 )
 
 # Token blacklist
 blacklisted_tokens = set()
-
-def validate_username(username):
-    """Validate username format and length"""
-    if not username or not isinstance(username, str):
-        return False, "Username is required and must be a string"
-    
-    if len(username.strip()) < 3 or len(username.strip()) > 50:
-        return False, "Username must be between 3 and 50 characters"
-    
-    if not re.match(r'^[a-zA-Z0-9_\-\.@]+$', username):
-        return False, "Username can only contain letters, numbers, dots, @, hyphens, and underscores"
-    
-    return True, None
-
-def validate_password(password):
-    """Validate password strength and format"""
-    if not password or not isinstance(password, str):
-        return False, "Password is required and must be a string"
-    
-    if len(password) < 8:
-        return False, "Password must be at least 8 characters long"
-    
-    if not re.search(r'[A-Z]', password):
-        return False, "Password must contain at least one uppercase letter"
-    
-    if not re.search(r'[a-z]', password):
-        return False, "Password must contain at least one lowercase letter"
-    
-    if not re.search(r'\d', password):
-        return False, "Password must contain at least one number"
-    
-    if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
-        return False, "Password must contain at least one special character"
-    
-    return True, None
-
-def validate_token(token):
-    """Validate JWT token format"""
-    if not token or not isinstance(token, str):
-        return False, "Token is required and must be a string"
-    
-    if token in blacklisted_tokens:
-        return False, "Token has been blacklisted"
-    
-    try:
-        jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
-        return True, None
-    except jwt.ExpiredSignatureError:
-        return False, "Token has expired"
-    except jwt.InvalidTokenError:
-        return False, "Invalid token format"
-
-def validate_request_data(request):
-    """Validate request data format"""
-    if not hasattr(request, 'get_json'):
-        return None, "Invalid request format"
-    
-    try:
-        data = request.get_json()
-    except Exception as e:
-        return None, f"Invalid JSON format: {str(e)}"
-    
-    if not isinstance(data, dict):
-        return None, "Request body must be a JSON object"
-    
-    return data, None
 
 def get_secret(secret_id):
     client = secretmanager.SecretManagerServiceClient()

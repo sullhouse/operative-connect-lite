@@ -23,6 +23,8 @@
     * Add environment-specific configurations
     * Implement staging environment
     * Add deployment verification tests
+* **User Activity Tracking:** Implement tracking of user activities for auditing purposes
+* **Data Export:** Add functionality to export data in CSV and JSON formats
 
 ## Completed Items
 * ✅ Data Validation: Implemented comprehensive input validation across all endpoints
@@ -30,12 +32,13 @@
 * ✅ In-Memory Storage: Removed in favor of BigQuery storage
 * ✅ Error Handling: Improved error messages and validation feedback
 * ✅ Token Management: Implemented JWT token refresh mechanism
+* ✅ Shortened Unique IDs: Updated ID generation to use 6-character unique IDs without dashes
+* ✅ SQL Injection Prevention: Reviewed and updated BigQuery queries to use parameterized queries
+* ✅ Environment Variables: Moved all configuration to environment variables
 
 ## Tech Debt
-* **SQL Injection Prevention:** Review and update BigQuery queries to use parameterized queries
 * **Token Security:** 
     * Add token blacklisting for logged out tokens
     * Implement token expiration cleanup
     * Add rate limiting for token refresh
-* **Environment Variables:** Move all configuration to environment variables
 * **Code Organization:** Split large files into smaller, focused modules

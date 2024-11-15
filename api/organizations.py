@@ -3,66 +3,9 @@ from google.cloud import bigquery
 from datetime import datetime
 import uuid
 import auth
-import re
+from utils import validate_organization_name, validate_uuid, validate_request_data, get_user_from_token
 
 project_id = os.environ.get('GCP_PROJECT')
-
-def validate_organization_name(name):
-    """Validate organization name format and length"""
-    if not name or not isinstance(name, str):
-        return False, "Organization name is required and must be a string"
-    
-    if len(name.strip()) < 3 or len(name.strip()) > 100:
-        return False, "Organization name must be between 3 and 100 characters"
-    
-    if not re.match(r'^[a-zA-Z0-9\s\-_]+$', name):
-        return False, "Organization name can only contain letters, numbers, spaces, hyphens, and underscores"
-    
-    return True, None
-
-def validate_uuid(uuid_string):
-    """Validate UUID format"""
-    try:
-        uuid_obj = uuid.UUID(uuid_string)
-        return True, None
-    except ValueError:
-        return False, "Invalid UUID format"
-
-def validate_request_data(request):
-    """Validate request data format"""
-    if hasattr(request, 'get_json'):
-        data = request.get_json()
-    else:
-        data = request.get('body', {})
-    
-    if not isinstance(data, dict):
-        return None, "Invalid request data format"
-    
-    return data, None
-
-def get_user_from_token(request):
-    """Extract username from authorized token"""
-    if not auth.authorized(request):
-        return None
-    
-    if hasattr(request, 'headers'):
-        token = request.headers.get('x-access-token')
-    else:
-        headers = request.get('headers', {})
-        token = headers.get('x-access-token')
-    
-    if not token or not isinstance(token, str):
-        return None
-    
-    try:
-        secret_key = auth.get_secret('SECRET_KEY')
-        data = auth.jwt.decode(token, secret_key, algorithms=["HS256"])
-        username = data.get('username')
-        if not username or not isinstance(username, str):
-            return None
-        return username
-    except:
-        return None
 
 def get_organization_details(org_id):
     """Get organization details from BigQuery"""
