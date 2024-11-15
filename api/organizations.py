@@ -2,7 +2,6 @@ import os
 from google.cloud import bigquery
 from datetime import datetime
 import uuid
-import auth
 from utils import validate_organization_name, validate_uuid, validate_request_data, get_user_from_token
 
 project_id = os.environ.get('GCP_PROJECT')

@@ -5,10 +5,11 @@ from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 import datetime
-from google.cloud import secretmanager, bigquery
+from google.cloud import bigquery
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from utils import validate_username, validate_password, validate_token, validate_request_data
+from secrets import get_secret  # Updated import
 
 # Initialize the Flask app
 app = Flask(__name__)
@@ -37,12 +38,6 @@ limiter = Limiter(
 
 # Token blacklist
 blacklisted_tokens = set()
-
-def get_secret(secret_id):
-    client = secretmanager.SecretManagerServiceClient()
-    name = f"projects/{project_id}/secrets/{secret_id}/versions/latest"
-    response = client.access_secret_version(name=name)
-    return response.payload.data.decode('UTF-8')
 
 def get_user_credentials(username):
     bigquery_client = bigquery.Client()
@@ -131,7 +126,7 @@ def login(request):
 def protected(request):
     # Validate token in headers
     token = request.headers.get('x-access-token')
-    is_valid, error = validate_token(token)
+    is_valid, error = validate_token(token, blacklisted_tokens)
     if not is_valid:
         return {"error": {"code": "INVALID_TOKEN", "message": error}}, 401
 
@@ -180,7 +175,7 @@ def authorized(request):
 def refresh(request):
     # Validate token in headers
     token = request.headers.get('x-access-token')
-    is_valid, error = validate_token(token)
+    is_valid, error = validate_token(token, blacklisted_tokens)
     if not is_valid:
         return {"error": {"code": "INVALID_TOKEN", "message": error}}, 401
 

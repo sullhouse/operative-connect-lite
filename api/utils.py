@@ -2,7 +2,7 @@ import re
 import uuid
 import jwt
 from flask import request
-from auth import get_secret
+from secrets import get_secret  # Updated import
 import auth
 
 def validate_organization_name(name):
@@ -61,7 +61,7 @@ def validate_password(password):
     
     return True, None
 
-def validate_token(token):
+def validate_token(token, blacklisted_tokens):
     """Validate JWT token format"""
     if not token or not isinstance(token, str):
         return False, "Token is required and must be a string"
