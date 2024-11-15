@@ -12,8 +12,6 @@ app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "http://ocl.sullhouse.com"}})
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default_secret_key')
 
-# In-memory user storage
-users = {}
 project_id = os.environ.get('GCP_PROJECT')
 
 def get_secret(secret_id):
