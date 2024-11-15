@@ -1,9 +1,69 @@
 const apiDomain = 'https://ocl-api.sullhouse.com';
 
+// Validation helper functions
+function validateUsername(username) {
+    if (!username || typeof username !== 'string') {
+        return { valid: false, message: "Username is required" };
+    }
+
+    if (username.length < 3 || username.length > 50) {
+        return { valid: false, message: "Username must be between 3 and 50 characters" };
+    }
+
+    const usernameRegex = /^[a-zA-Z0-9_\-\.@]+$/;
+    if (!usernameRegex.test(username)) {
+        return { valid: false, message: "Username can only contain letters, numbers, dots, @, hyphens, and underscores" };
+    }
+
+    return { valid: true };
+}
+
+function validatePassword(password) {
+    if (!password || typeof password !== 'string') {
+        return { valid: false, message: "Password is required" };
+    }
+
+    if (password.length < 8) {
+        return { valid: false, message: "Password must be at least 8 characters long" };
+    }
+
+    if (!/[A-Z]/.test(password)) {
+        return { valid: false, message: "Password must contain at least one uppercase letter" };
+    }
+
+    if (!/[a-z]/.test(password)) {
+        return { valid: false, message: "Password must contain at least one lowercase letter" };
+    }
+
+    if (!/\d/.test(password)) {
+        return { valid: false, message: "Password must contain at least one number" };
+    }
+
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+        return { valid: false, message: "Password must contain at least one special character" };
+    }
+
+    return { valid: true };
+}
+
 document.getElementById('login-form').addEventListener('submit', async function(event) {
     event.preventDefault();
     const username = document.getElementById('login-username').value;
     const password = document.getElementById('login-password').value;
+
+    // Validate username
+    const usernameValidation = validateUsername(username);
+    if (!usernameValidation.valid) {
+        alert(usernameValidation.message);
+        return;
+    }
+
+    // Validate password
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.valid) {
+        alert(passwordValidation.message);
+        return;
+    }
 
     const response = await fetch(`${apiDomain}/auth/login`, {
         method: 'POST',
@@ -26,6 +86,20 @@ document.getElementById('register-form').addEventListener('submit', async functi
     event.preventDefault();
     const username = document.getElementById('register-username').value;
     const password = document.getElementById('register-password').value;
+
+    // Validate username
+    const usernameValidation = validateUsername(username);
+    if (!usernameValidation.valid) {
+        alert(usernameValidation.message);
+        return;
+    }
+
+    // Validate password
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.valid) {
+        alert(passwordValidation.message);
+        return;
+    }
 
     const response = await fetch(`${apiDomain}/auth/register`, {
         method: 'POST',

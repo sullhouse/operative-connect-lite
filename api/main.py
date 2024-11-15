@@ -9,12 +9,27 @@ import datetime
 import os
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "http://ocl.sullhouse.com"}})
+
+# Define allowed origins
+ALLOWED_ORIGINS = [
+    "http://ocl.sullhouse.com",      # Production
+    "http://localhost:5000",         # Local development
+    "http://127.0.0.1:5000"         # Local development alternative
+]
+
+# Configure CORS with specific origins and options
+CORS(app, resources={
+    r"/*": {
+        "origins": ALLOWED_ORIGINS,
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type", "x-access-token"]
+    }
+})
+
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default_secret_key')
 
-# For local testing provide credentials: os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = 'operative-connect-lite-41ee5442dc06.json'
 @functions_framework.http
-@cross_origin(origins="http://ocl.sullhouse.com")
+@cross_origin(origins=ALLOWED_ORIGINS)
 def hello_http(request):
     """Main Cloud Function that saves the request to a file and dispatches requests based on the URL path.
 
@@ -101,16 +116,16 @@ def hello_http(request):
                     content_type='application/json'
                 )
             except Exception as e:
-                error_response = Response(json.dumps({"error": str(e)}), status=500, mimetype='application/json')
+                error_response = Response(json.dumps({"error": {"code": "INTERNAL_ERROR", "message": str(e)}}), status=500, mimetype='application/json')
                 return error_response
 
             # Return the response as JSON
             json_response = Response(json.dumps(response), status=status_code, mimetype='application/json')
             return json_response
         else:
-            error_response = Response(json.dumps({"error": "Function not found"}), status=404, mimetype='application/json')
+            error_response = Response(json.dumps({"error": {"code": "NOT_FOUND", "message": "Function not found"}}), status=404, mimetype='application/json')
             return error_response
 
     except Exception as e:
-        error_response = Response(json.dumps({"error": str(e)}), status=500, mimetype='application/json')
+        error_response = Response(json.dumps({"error": {"code": "INTERNAL_ERROR", "message": str(e)}}), status=500, mimetype='application/json')
         return error_response
