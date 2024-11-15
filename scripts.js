@@ -76,7 +76,7 @@ async function fetchOrganizations() {
         return;
     }
 
-    const response = await fetch(`${apiDomain}/organizations`, {
+    const response = await fetch(`${apiDomain}/organizations/list`, {
         method: 'GET',
         headers: {
             'x-access-token': token
@@ -98,7 +98,7 @@ async function fetchPartnerships() {
         return;
     }
 
-    const response = await fetch(`${apiDomain}/partnerships`, {
+    const response = await fetch(`${apiDomain}/organizations/partnerships/list`, {
         method: 'GET',
         headers: {
             'x-access-token': token
@@ -137,7 +137,7 @@ document.getElementById('add-organization-form').addEventListener('submit', asyn
     event.preventDefault();
     const orgName = document.getElementById('new-organization-name').value;
 
-    const response = await fetch(`${apiDomain}/organizations`, {
+    const response = await fetch(`${apiDomain}/organizations/create`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -160,7 +160,7 @@ document.getElementById('add-partnership-form').addEventListener('submit', async
     const demandOrgId = document.getElementById('demand-org-id').value;
     const supplyOrgId = document.getElementById('supply-org-id').value;
 
-    const response = await fetch(`${apiDomain}/partnerships`, {
+    const response = await fetch(`${apiDomain}/organizations/partnerships/create`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
