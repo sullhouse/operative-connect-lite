@@ -2,7 +2,7 @@ import re
 import uuid
 import jwt
 from flask import request
-from api.secrets import get_secret  # Updated import
+import secrets
 import auth
 
 def validate_organization_name(name):
@@ -70,7 +70,7 @@ def validate_token(token, blacklisted_tokens):
         return False, "Token has been blacklisted"
     
     try:
-        jwt.decode(token, get_secret('SECRET_KEY'), algorithms=["HS256"])
+        jwt.decode(token, secrets.get_secret('SECRET_KEY'), algorithms=["HS256"])
         return True, None
     except jwt.ExpiredSignatureError:
         return False, "Token has expired"

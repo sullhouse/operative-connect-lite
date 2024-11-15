@@ -2,7 +2,7 @@ import os
 from google.cloud import bigquery
 from datetime import datetime
 import uuid
-from utils import validate_organization_name, validate_uuid, validate_request_data, get_user_from_token
+import utils
 
 project_id = os.environ.get('GCP_PROJECT')
 
@@ -28,17 +28,17 @@ def get_organization_details(org_id):
 
 def create_organization(request):
     """Create a new organization and map user to it"""
-    username = get_user_from_token(request)
+    username = utils.get_user_from_token(request)
     if not username:
         return {"message": "Unauthorized"}, 401
 
     # Validate request data
-    data, error = validate_request_data(request)
+    data, error = utils.validate_request_data(request)
     if error:
         return {"message": error}, 400
 
     org_name = data.get('organization_name')
-    is_valid, error = validate_organization_name(org_name)
+    is_valid, error = utils.validate_organization_name(org_name)
     if not is_valid:
         return {"message": error}, 400
 
@@ -82,7 +82,7 @@ def create_organization(request):
     return {"message": "Organization created successfully", "organization_id": org_id}, 200
 
 def list_organizations(request):
-    username = get_user_from_token(request)
+    username = utils.get_user_from_token(request)
     if not username:
         return {"message": "Unauthorized"}, 401
 
@@ -109,12 +109,12 @@ def list_organizations(request):
 
 def create_partnership(request):
     """Create partnership between two organizations"""
-    username = get_user_from_token(request)
+    username = utils.get_user_from_token(request)
     if not username:
         return {"message": "Unauthorized"}, 401
 
     # Validate request data
-    data, error = validate_request_data(request)
+    data, error = utils.validate_request_data(request)
     if error:
         return {"message": error}, 400
 
@@ -125,11 +125,11 @@ def create_partnership(request):
     if not demand_org_id or not supply_org_id:
         return {"message": "Both organization IDs are required"}, 400
     
-    is_valid, error = validate_uuid(demand_org_id)
+    is_valid, error = utils.validate_uuid(demand_org_id)
     if not is_valid:
         return {"message": f"Invalid demand organization ID: {error}"}, 400
     
-    is_valid, error = validate_uuid(supply_org_id)
+    is_valid, error = utils.validate_uuid(supply_org_id)
     if not is_valid:
         return {"message": f"Invalid supply organization ID: {error}"}, 400
 
@@ -181,7 +181,8 @@ def create_partnership(request):
     return {"message": "Partnership created successfully", "partnership_id": partnership_id}, 200
 
 def list_partnerships(request):
-    username = get_user_from_token(request)
+    """List partnerships for organizations user has access to (distinct)"""
+    username = utils.get_user_from_token(request)
     if not username:
         return {"message": "Unauthorized"}, 401
 

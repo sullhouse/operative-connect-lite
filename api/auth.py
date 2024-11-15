@@ -1,6 +1,5 @@
 import os
-import re
-from flask import Flask, make_response, request
+from flask import Flask, make_response
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
@@ -8,8 +7,8 @@ import datetime
 from google.cloud import bigquery
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from api.utils import validate_username, validate_password, validate_token, validate_request_data
-from api.secrets import get_secret  # Updated import
+import utils
+import secrets
 
 # Initialize the Flask app
 app = Flask(__name__)
@@ -55,7 +54,7 @@ def get_user_credentials(username):
 
 def register(request):
     # Validate request format
-    data, error = validate_request_data(request)
+    data, error = utils.validate_request_data(request)
     if error:
         return {"error": {"code": "INVALID_REQUEST", "message": error}}, 400
     
@@ -63,17 +62,17 @@ def register(request):
     password = data.get('password')
 
     # Validate username
-    is_valid, error = validate_username(username)
+    is_valid, error = utils.validate_username(username)
     if not is_valid:
         return {"error": {"code": "INVALID_USERNAME", "message": error}}, 400
 
     # Validate password
-    is_valid, error = validate_password(password)
+    is_valid, error = utils.validate_password(password)
     if not is_valid:
         return {"error": {"code": "INVALID_PASSWORD", "message": error}}, 400
 
     # Check if username exists
-    existing_username, _ = get_user_credentials(username)
+    existing_username, _ = utils.get_user_credentials(username)
     if existing_username:
         return {"error": {"code": "USERNAME_EXISTS", "message": "Username already exists"}}, 400
 
@@ -91,7 +90,7 @@ def register(request):
 
 def login(request):
     # Validate request format
-    data, error = validate_request_data(request)
+    data, error = utils.validate_request_data(request)
     if error:
         return {"error": {"code": "INVALID_REQUEST", "message": error}}, 400
     
@@ -99,7 +98,7 @@ def login(request):
     password = data.get('password')
 
     # Validate username
-    is_valid, error = validate_username(username)
+    is_valid, error = utils.validate_username(username)
     if not is_valid:
         return {"error": {"code": "INVALID_USERNAME", "message": error}}, 400
 
@@ -113,7 +112,7 @@ def login(request):
         return {"error": {"code": "INVALID_CREDENTIALS", "message": "Invalid credentials"}}, 401
 
     # Generate token
-    secret_key = get_secret('SECRET_KEY')
+    secret_key = secrets.get_secret('SECRET_KEY')
     token = jwt.encode(
         {
             'username': username,
@@ -126,16 +125,16 @@ def login(request):
 def protected(request):
     # Validate token in headers
     token = request.headers.get('x-access-token')
-    is_valid, error = validate_token(token, blacklisted_tokens)
+    is_valid, error = utils.validate_token(token, blacklisted_tokens)
     if not is_valid:
         return {"error": {"code": "INVALID_TOKEN", "message": error}}, 401
 
     try:
-        data = jwt.decode(token, get_secret('SECRET_KEY'), algorithms=["HS256"])
+        data = jwt.decode(token, secrets.get_secret('SECRET_KEY'), algorithms=["HS256"])
         current_user = data['username']
         
         # Validate extracted username
-        is_valid, error = validate_username(current_user)
+        is_valid, error = utils.validate_username(current_user)
         if not is_valid:
             return {"error": {"code": "INVALID_USERNAME", "message": "Invalid username in token"}}, 401
             
@@ -164,7 +163,7 @@ def authorized(request):
         return False
 
     try:
-        secret_key = get_secret('SECRET_KEY')
+        secret_key = secrets.get_secret('SECRET_KEY')
         jwt.decode(token, secret_key, algorithms=["HS256"])
         return True
     except Exception as e:
@@ -175,16 +174,16 @@ def authorized(request):
 def refresh(request):
     # Validate token in headers
     token = request.headers.get('x-access-token')
-    is_valid, error = validate_token(token, blacklisted_tokens)
+    is_valid, error = utils.validate_token(token, blacklisted_tokens)
     if not is_valid:
         return {"error": {"code": "INVALID_TOKEN", "message": error}}, 401
 
     try:
-        data = jwt.decode(token, get_secret('SECRET_KEY'), algorithms=["HS256"], options={"verify_exp": False})
+        data = jwt.decode(token, secrets.get_secret('SECRET_KEY'), algorithms=["HS256"], options={"verify_exp": False})
         current_user = data['username']
 
         # Validate extracted username
-        is_valid, error = validate_username(current_user)
+        is_valid, error = utils.validate_username(current_user)
         if not is_valid:
             return {"error": {"code": "INVALID_USERNAME", "message": "Invalid username in token"}}, 401
 
@@ -194,7 +193,7 @@ def refresh(request):
                 'username': current_user,
                 'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1)
             },
-            get_secret('SECRET_KEY')
+            secrets.get_secret('SECRET_KEY')
         )
         return {"token": new_token}, 200
     except Exception as e:
