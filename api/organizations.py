@@ -85,20 +85,20 @@ def get_organization_details(org_id):
     return None
 
 def create_organization(request):
-    # Remove Swagger documentation
+    """Create a new organization and map user to it"""
     username = get_user_from_token(request)
     if not username:
-        return {"error": {"code": "UNAUTHORIZED", "message": "Unauthorized"}}, 401
+        return {"message": "Unauthorized"}, 401
 
     # Validate request data
     data, error = validate_request_data(request)
     if error:
-        return {"error": {"code": "INVALID_REQUEST", "message": error}}, 400
+        return {"message": error}, 400
 
     org_name = data.get('organization_name')
     is_valid, error = validate_organization_name(org_name)
     if not is_valid:
-        return {"error": {"code": "INVALID_ORGANIZATION_NAME", "message": error}}, 400
+        return {"message": error}, 400
 
     client = bigquery.Client()
     
@@ -109,10 +109,10 @@ def create_organization(request):
     """
     results = client.query(query).result()
     if list(results):
-        return {"error": {"code": "ORGANIZATION_EXISTS", "message": "Organization name already exists"}}, 400
+        return {"message": "Organization name already exists"}, 400
 
     # Create organization
-    org_id = str(uuid.uuid4())
+    org_id = str(uuid.uuid4()).replace('-', '')[:6]  # Shorten to 6 characters with no dashes
     created_at = datetime.utcnow()
     
     org_insert = {
@@ -124,7 +124,7 @@ def create_organization(request):
     
     errors = client.insert_rows_json(f"{project_id}.organizations.organizations", [org_insert])
     if errors:
-        return {"error": {"code": "INTERNAL_ERROR", "message": "Failed to create organization"}}, 500
+        return {"message": "Failed to create organization"}, 500
 
     # Map user to organization
     user_org_insert = {
@@ -135,7 +135,7 @@ def create_organization(request):
     
     errors = client.insert_rows_json(f"{project_id}.users.user_organization", [user_org_insert])
     if errors:
-        return {"error": {"code": "INTERNAL_ERROR", "message": "Failed to map user to organization"}}, 500
+        return {"message": "Failed to map user to organization"}, 500
 
     return {"message": "Organization created successfully", "organization_id": org_id}, 200
 
@@ -170,30 +170,30 @@ def create_partnership(request):
     """Create partnership between two organizations"""
     username = get_user_from_token(request)
     if not username:
-        return {"error": {"code": "UNAUTHORIZED", "message": "Unauthorized"}}, 401
+        return {"message": "Unauthorized"}, 401
 
     # Validate request data
     data, error = validate_request_data(request)
     if error:
-        return {"error": {"code": "INVALID_REQUEST", "message": error}}, 400
+        return {"message": error}, 400
 
     demand_org_id = data.get('demand_org_id')
     supply_org_id = data.get('supply_org_id')
     
     # Validate organization IDs
     if not demand_org_id or not supply_org_id:
-        return {"error": {"code": "INVALID_ORGANIZATION_ID", "message": "Both organization IDs are required"}}, 400
+        return {"message": "Both organization IDs are required"}, 400
     
     is_valid, error = validate_uuid(demand_org_id)
     if not is_valid:
-        return {"error": {"code": "INVALID_UUID", "message": f"Invalid demand organization ID: {error}"}}, 400
+        return {"message": f"Invalid demand organization ID: {error}"}, 400
     
     is_valid, error = validate_uuid(supply_org_id)
     if not is_valid:
-        return {"error": {"code": "INVALID_UUID", "message": f"Invalid supply organization ID: {error}"}}, 400
+        return {"message": f"Invalid supply organization ID: {error}"}, 400
 
     if demand_org_id == supply_org_id:
-        return {"error": {"code": "INVALID_ORGANIZATION_ID", "message": "Demand and supply organizations must be different"}}, 400
+        return {"message": "Demand and supply organizations must be different"}, 400
 
     client = bigquery.Client()
     
@@ -204,7 +204,7 @@ def create_partnership(request):
     """
     results = client.query(query).result()
     if not list(results):
-        return {"error": {"code": "UNAUTHORIZED", "message": "Unauthorized access to demand organization"}}, 401
+        return {"message": "Unauthorized access to demand organization"}, 401
 
     # Verify both organizations exist
     query = f"""
@@ -213,7 +213,7 @@ def create_partnership(request):
     """
     results = list(client.query(query).result())
     if len(results) != 2:
-        return {"error": {"code": "ORGANIZATION_NOT_FOUND", "message": "One or both organizations do not exist"}}, 400
+        return {"message": "One or both organizations do not exist"}, 400
 
     # Check if partnership already exists
     query = f"""
@@ -223,10 +223,10 @@ def create_partnership(request):
     """
     results = client.query(query).result()
     if list(results):
-        return {"error": {"code": "PARTNERSHIP_EXISTS", "message": "Partnership already exists between these organizations"}}, 400
+        return {"message": "Partnership already exists between these organizations"}, 400
 
     # Create partnership
-    partnership_id = str(uuid.uuid4())
+    partnership_id = str(uuid.uuid4()).replace('-', '')[:6]  # Shorten to 6 characters with no dashes
     partnership_insert = {
         'partnership_id': partnership_id,
         'demand_org_id': demand_org_id,
@@ -235,23 +235,12 @@ def create_partnership(request):
     
     errors = client.insert_rows_json(f"{project_id}.organizations.partnerships", [partnership_insert])
     if errors:
-        return {"error": {"code": "INTERNAL_ERROR", "message": "Failed to create partnership"}}, 500
+        return {"message": "Failed to create partnership"}, 500
 
     return {"message": "Partnership created successfully", "partnership_id": partnership_id}, 200
 
 def list_partnerships(request):
-    """List partnerships for organizations user has access to (distinct)
-    ---
-    tags:
-      - Organizations
-    responses:
-      200:
-        description: List of partnerships
-      401:
-        description: Unauthorized
-      500:
-        description: Internal server error
-    """
+    """List partnerships for organizations user has access to (distinct)"""
     username = get_user_from_token(request)
     if not username:
         return {"message": "Unauthorized"}, 401
