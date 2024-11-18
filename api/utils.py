@@ -14,6 +14,21 @@ def get_secret(secret_id):
     response = client.access_secret_version(name=name)
     return response.payload.data.decode('UTF-8')
 
+def validate_request_data(request):
+    """Validate request data format"""
+    if not hasattr(request, 'get_json'):
+        return None, "Invalid request format"
+    
+    try:
+        data = request.get_json()
+    except Exception as e:
+        return None, f"Invalid JSON format: {str(e)}"
+    
+    if not isinstance(data, dict):
+        return None, "Request body must be a JSON object"
+    
+    return data, None
+
 def validate_organization_name(name):
     """Validate organization name format and length"""
     if not name or not isinstance(name, str):
@@ -109,3 +124,19 @@ def get_user_from_token(request):
         return username
     except:
         return None
+    
+def get_user_credentials(username):
+    """Get user credentials from BigQuery"""
+    project_id = os.environ.get('GCP_PROJECT')
+    bigquery_client = bigquery.Client()
+    query = f"""
+        SELECT username, hashed_password
+        FROM `{project_id}.users.users`
+        WHERE username = '{username}'
+    """
+    query_job = bigquery_client.query(query)
+    results = query_job.result()
+
+    for row in results:
+        return row.username, row.hashed_password
+    return None, None
