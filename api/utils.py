@@ -5,6 +5,7 @@ from flask import request
 import auth
 from google.cloud import secretmanager
 import os
+from google.cloud import bigquery
 
 project_id = os.environ.get('GCP_PROJECT')
 
