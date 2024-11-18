@@ -45,6 +45,8 @@ def validate_organization_name(name):
 
 def validate_uuid(uuid_string):
     """Validate UUID format"""
+    if len(uuid_string) == 6 and re.match(r'^[a-fA-F0-9]{6}$', uuid_string):
+        return True, None
     try:
         uuid_obj = uuid.UUID(uuid_string)
         return True, None

@@ -79,7 +79,8 @@ def hello_http(request):
             "organizations/create": "organizations.create_organization",
             "organizations/list": "organizations.list_organizations",
             "organizations/partnerships/create": "organizations.create_partnership",
-            "organizations/partnerships/list": "organizations.list_partnerships"
+            "organizations/partnerships/list": "organizations.list_partnerships",
+            "organizations/map_user": "organizations.map_user_to_organization"  # Add this line
         }
 
         # Import the corresponding module dynamically

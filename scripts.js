@@ -307,3 +307,28 @@ function getCookie(name) {
     const parts = value.split(`; ${name}=`);
     if (parts.length === 2) return parts.pop().split(';').shift();
 }
+
+async function checkIfLoggedIn() {
+    const token = getCookie('token');
+    if (!token) {
+        showLoginForm();
+        return;
+    }
+
+    const response = await fetch(`${apiDomain}/auth/validate-token`, {
+        method: 'GET',
+        headers: {
+            'x-access-token': token
+        }
+    });
+
+    if (response.ok) {
+        showHomeView();
+    } else {
+        showLoginForm();
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    checkIfLoggedIn();
+});

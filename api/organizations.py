@@ -226,3 +226,42 @@ def list_partnerships(request):
         })
     
     return {"partnerships": partnerships}, 200
+
+def map_user_to_organization(request):
+    """Map a user to an existing organization"""
+    username = utils.get_user_from_token(request)
+    if not username:
+        return {"message": "Unauthorized"}, 401
+
+    # Validate request data
+    data, error = utils.validate_request_data(request)
+    if error:
+        return {"message": error}, 400
+
+    org_id = data.get('organization_id')
+    if not org_id:
+        return {"message": "Organization ID is required"}, 400
+
+    client = bigquery.Client()
+
+    # Check if organization exists
+    query = f"""
+        SELECT organization_id FROM `{project_id}.organizations.organizations`
+        WHERE organization_id = '{org_id}'
+    """
+    results = client.query(query).result()
+    if not list(results):
+        return {"message": "Organization does not exist"}, 400
+
+    # Map user to organization
+    user_org_insert = {
+        'username': username,
+        'organization_id': org_id,
+        'status': 'active'
+    }
+    
+    errors = client.insert_rows_json(f"{project_id}.users.user_organization", [user_org_insert])
+    if errors:
+        return {"message": "Failed to map user to organization"}, 500
+
+    return {"message": "User mapped to organization successfully"}, 200
