@@ -3,28 +3,13 @@ from google.cloud import bigquery
 from datetime import datetime
 import uuid
 import utils
+import database
 
 project_id = os.environ.get('GCP_PROJECT')
 
 def get_organization_details(org_id):
     """Get organization details from BigQuery"""
-    client = bigquery.Client()
-    query = f"""
-        SELECT organization_id, organization_name, created_by, created_at
-        FROM `{project_id}.organizations.organizations`
-        WHERE organization_id = '{org_id}'
-    """
-    query_job = client.query(query)
-    results = query_job.result()
-    
-    for row in results:
-        return {
-            'organization_id': row.organization_id,
-            'organization_name': row.organization_name,
-            'created_by': row.created_by,
-            'created_at': row.created_at.isoformat()
-        }
-    return None
+    return database.get_organization_details(org_id)
 
 def create_organization(request):
     """Create a new organization and map user to it"""
@@ -45,12 +30,7 @@ def create_organization(request):
     client = bigquery.Client()
     
     # Check if organization name exists
-    query = f"""
-        SELECT organization_id FROM `{project_id}.organizations.organizations`
-        WHERE organization_name = '{org_name}'
-    """
-    results = client.query(query).result()
-    if list(results):
+    if database.check_organization_name_exists(org_name):
         return {"message": "Organization name already exists"}, 400
 
     # Create organization
@@ -64,7 +44,7 @@ def create_organization(request):
         'created_at': created_at.isoformat()
     }
     
-    errors = client.insert_rows_json(f"{project_id}.organizations.organizations", [org_insert])
+    errors = database.insert_rows(f"{project_id}.organizations.organizations", [org_insert])
     if errors:
         return {"message": "Failed to create organization"}, 500
 
@@ -75,7 +55,7 @@ def create_organization(request):
         'status': 'active'
     }
     
-    errors = client.insert_rows_json(f"{project_id}.users.user_organization", [user_org_insert])
+    errors = database.insert_rows(f"{project_id}.users.user_organization", [user_org_insert])
     if errors:
         return {"message": "Failed to map user to organization"}, 500
 
@@ -87,15 +67,7 @@ def list_organizations(request):
         return {"message": "Unauthorized"}, 401
 
     client = bigquery.Client()
-    query = f"""
-        SELECT o.* 
-        FROM `{project_id}.organizations.organizations` o
-        JOIN `{project_id}.users.user_organization` uo 
-        ON o.organization_id = uo.organization_id
-        WHERE uo.username = '{username}'
-    """
-    
-    results = client.query(query).result()
+    results = database.list_organizations_for_user(username)
     organizations = []
     for row in results:
         organizations.append({
@@ -139,31 +111,15 @@ def create_partnership(request):
     client = bigquery.Client()
     
     # Verify user has access to demand organization
-    query = f"""
-        SELECT organization_id FROM `{project_id}.users.user_organization`
-        WHERE username = '{username}' AND organization_id = '{demand_org_id}'
-    """
-    results = client.query(query).result()
-    if not list(results):
+    if not database.check_user_access_to_organization(username, demand_org_id):
         return {"message": "Unauthorized access to demand organization"}, 401
 
     # Verify both organizations exist
-    query = f"""
-        SELECT organization_id FROM `{project_id}.organizations.organizations`
-        WHERE organization_id IN ('{demand_org_id}', '{supply_org_id}')
-    """
-    results = list(client.query(query).result())
-    if len(results) != 2:
+    if len(database.check_organizations_exist([demand_org_id, supply_org_id])) != 2:
         return {"message": "One or both organizations do not exist"}, 400
 
     # Check if partnership already exists
-    query = f"""
-        SELECT partnership_id FROM `{project_id}.organizations.partnerships`
-        WHERE (demand_org_id = '{demand_org_id}' AND supply_org_id = '{supply_org_id}')
-        OR (demand_org_id = '{supply_org_id}' AND supply_org_id = '{demand_org_id}')
-    """
-    results = client.query(query).result()
-    if list(results):
+    if database.check_partnership_exists(demand_org_id, supply_org_id):
         return {"message": "Partnership already exists between these organizations"}, 400
 
     # Create partnership
@@ -174,7 +130,7 @@ def create_partnership(request):
         'supply_org_id': supply_org_id
     }
     
-    errors = client.insert_rows_json(f"{project_id}.organizations.partnerships", [partnership_insert])
+    errors = database.insert_rows(f"{project_id}.organizations.partnerships", [partnership_insert])
     if errors:
         return {"message": "Failed to create partnership"}, 500
 
@@ -187,26 +143,7 @@ def list_partnerships(request):
         return {"message": "Unauthorized"}, 401
 
     client = bigquery.Client()
-    query = f"""
-        SELECT DISTINCT
-            p.partnership_id,
-            d.organization_id as demand_org_id,
-            d.organization_name as demand_org_name,
-            d.created_by as demand_org_created_by,
-            d.created_at as demand_org_created_at,
-            s.organization_id as supply_org_id,
-            s.organization_name as supply_org_name,
-            s.created_by as supply_org_created_by,
-            s.created_at as supply_org_created_at
-        FROM `{project_id}.organizations.partnerships` p
-        JOIN `{project_id}.organizations.organizations` d ON p.demand_org_id = d.organization_id
-        JOIN `{project_id}.organizations.organizations` s ON p.supply_org_id = s.organization_id
-        JOIN `{project_id}.users.user_organization` uo 
-        ON uo.organization_id = d.organization_id OR uo.organization_id = s.organization_id
-        WHERE uo.username = '{username}'
-    """
-    
-    results = client.query(query).result()
+    results = database.list_partnerships_for_user(username)
     partnerships = []
     for row in results:
         partnerships.append({
@@ -245,12 +182,7 @@ def map_user_to_organization(request):
     client = bigquery.Client()
 
     # Check if organization exists
-    query = f"""
-        SELECT organization_id FROM `{project_id}.organizations.organizations`
-        WHERE organization_id = '{org_id}'
-    """
-    results = client.query(query).result()
-    if not list(results):
+    if not database.check_organizations_exist([org_id]):
         return {"message": "Organization does not exist"}, 400
 
     # Map user to organization
@@ -260,7 +192,7 @@ def map_user_to_organization(request):
         'status': 'active'
     }
     
-    errors = client.insert_rows_json(f"{project_id}.users.user_organization", [user_org_insert])
+    errors = database.insert_rows(f"{project_id}.users.user_organization", [user_org_insert])
     if errors:
         return {"message": "Failed to map user to organization"}, 500
 

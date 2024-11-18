@@ -6,6 +6,7 @@ import auth
 from google.cloud import secretmanager
 import os
 from google.cloud import bigquery
+from database import get_user_credentials as db_get_user_credentials
 
 project_id = os.environ.get('GCP_PROJECT')
 
@@ -129,16 +130,4 @@ def get_user_from_token(request):
     
 def get_user_credentials(username):
     """Get user credentials from BigQuery"""
-    project_id = os.environ.get('GCP_PROJECT')
-    bigquery_client = bigquery.Client()
-    query = f"""
-        SELECT username, hashed_password
-        FROM `{project_id}.users.users`
-        WHERE username = '{username}'
-    """
-    query_job = bigquery_client.query(query)
-    results = query_job.result()
-
-    for row in results:
-        return row.username, row.hashed_password
-    return None, None
+    return db_get_user_credentials(username)

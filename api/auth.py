@@ -8,6 +8,7 @@ from google.cloud import bigquery
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 import utils
+import database
 
 # Initialize the Flask app
 app = Flask(__name__)
@@ -38,18 +39,7 @@ limiter = Limiter(
 blacklisted_tokens = set()
 
 def get_user_credentials(username):
-    bigquery_client = bigquery.Client()
-    query = f"""
-        SELECT username, hashed_password
-        FROM `{project_id}.users.users`
-        WHERE username = '{username}'
-    """
-    query_job = bigquery_client.query(query)
-    results = query_job.result()
-
-    for row in results:
-        return row.username, row.hashed_password
-    return None, None
+    return database.get_user_credentials(username)
 
 def register(request):
     # Validate request format
@@ -71,7 +61,7 @@ def register(request):
         return {"error": {"code": "INVALID_PASSWORD", "message": error}}, 400
 
     # Check if username exists
-    existing_username, _ = utils.get_user_credentials(username)
+    existing_username, _ = database.get_user_credentials(username)
     if existing_username:
         return {"error": {"code": "USERNAME_EXISTS", "message": "Username already exists"}}, 400
 
@@ -80,7 +70,7 @@ def register(request):
     client = bigquery.Client()
     table_id = f"{project_id}.users.users"
     rows_to_insert = [{"username": username, "hashed_password": hashed_password}]
-    errors = client.insert_rows_json(table_id, rows_to_insert)
+    errors = database.insert_rows(table_id, rows_to_insert)
     
     if errors:
         return {"error": {"code": "INTERNAL_ERROR", "message": "Failed to register user"}}, 500
@@ -106,7 +96,7 @@ def login(request):
         return {"error": {"code": "INVALID_PASSWORD", "message": "Password is required and must be a string"}}, 400
 
     # Verify credentials
-    stored_username, stored_hashed_password = get_user_credentials(username)
+    stored_username, stored_hashed_password = database.get_user_credentials(username)
     if not stored_username or not check_password_hash(stored_hashed_password, password):
         return {"error": {"code": "INVALID_CREDENTIALS", "message": "Invalid credentials"}}, 401
 
