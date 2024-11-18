@@ -117,8 +117,7 @@ def get_user_from_token(request):
         return None
     
     try:
-        secret_key = auth.get_secret('SECRET_KEY')
-        data = auth.jwt.decode(token, secret_key, algorithms=["HS256"])
+        data = auth.jwt.decode(token, get_secret('SECRET_KEY'), algorithms=["HS256"])
         username = data.get('username')
         if not username or not isinstance(username, str):
             return None
