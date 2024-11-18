@@ -4,7 +4,6 @@ from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 import datetime
-from google.cloud import bigquery
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 import utils
@@ -67,7 +66,6 @@ def register(request):
 
     # Create new user
     hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
-    client = bigquery.Client()
     table_id = f"{project_id}.users.users"
     rows_to_insert = [{"username": username, "hashed_password": hashed_password}]
     errors = database.insert_rows(table_id, rows_to_insert)

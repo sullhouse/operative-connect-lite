@@ -1,5 +1,4 @@
 import os
-from google.cloud import bigquery
 from datetime import datetime
 import uuid
 import utils
@@ -26,8 +25,6 @@ def create_organization(request):
     is_valid, error = utils.validate_organization_name(org_name)
     if not is_valid:
         return {"message": error}, 400
-
-    client = bigquery.Client()
     
     # Check if organization name exists
     if database.check_organization_name_exists(org_name):
@@ -66,7 +63,6 @@ def list_organizations(request):
     if not username:
         return {"message": "Unauthorized"}, 401
 
-    client = bigquery.Client()
     results = database.list_organizations_for_user(username)
     organizations = []
     for row in results:
@@ -107,8 +103,6 @@ def create_partnership(request):
 
     if demand_org_id == supply_org_id:
         return {"message": "Demand and supply organizations must be different"}, 400
-
-    client = bigquery.Client()
     
     # Verify user has access to demand organization
     if not database.check_user_access_to_organization(username, demand_org_id):
@@ -142,7 +136,6 @@ def list_partnerships(request):
     if not username:
         return {"message": "Unauthorized"}, 401
 
-    client = bigquery.Client()
     results = database.list_partnerships_for_user(username)
     partnerships = []
     for row in results:
@@ -178,8 +171,6 @@ def map_user_to_organization(request):
     org_id = data.get('organization_id')
     if not org_id:
         return {"message": "Organization ID is required"}, 400
-
-    client = bigquery.Client()
 
     # Check if organization exists
     if not database.check_organizations_exist([org_id]):
