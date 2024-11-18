@@ -3,7 +3,6 @@ from google.cloud import bigquery
 from datetime import datetime
 import uuid
 import utils
-import secrets
 
 project_id = os.environ.get('GCP_PROJECT')
 
@@ -29,7 +28,7 @@ def get_organization_details(org_id):
 
 def create_organization(request):
     """Create a new organization and map user to it"""
-    username = utils.get_user_from_token(request, secrets.get_secret('SECRET_KEY'))
+    username = utils.get_user_from_token(request, utils.get_secret('SECRET_KEY'))
     if not username:
         return {"message": "Unauthorized"}, 401
 
@@ -83,7 +82,7 @@ def create_organization(request):
     return {"message": "Organization created successfully", "organization_id": org_id}, 200
 
 def list_organizations(request):
-    username = utils.get_user_from_token(request, secrets.get_secret('SECRET_KEY'))
+    username = utils.get_user_from_token(request, utils.get_secret('SECRET_KEY'))
     if not username:
         return {"message": "Unauthorized"}, 401
 
@@ -110,7 +109,7 @@ def list_organizations(request):
 
 def create_partnership(request):
     """Create partnership between two organizations"""
-    username = utils.get_user_from_token(request, secrets.get_secret('SECRET_KEY'))
+    username = utils.get_user_from_token(request, utils.get_secret('SECRET_KEY'))
     if not username:
         return {"message": "Unauthorized"}, 401
 
@@ -183,7 +182,7 @@ def create_partnership(request):
 
 def list_partnerships(request):
     """List partnerships for organizations user has access to (distinct)"""
-    username = utils.get_user_from_token(request, secrets.get_secret('SECRET_KEY'))
+    username = utils.get_user_from_token(request, utils.get_secret('SECRET_KEY'))
     if not username:
         return {"message": "Unauthorized"}, 401
 

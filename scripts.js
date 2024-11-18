@@ -1,4 +1,5 @@
-const apiDomain = 'https://ocl-api.sullhouse.com';
+// const apiDomain = 'https://ocl-api.sullhouse.com';
+const apiDomain = 'http://127.0.0.1:8080';
 
 // Validation helper functions
 function validateUsername(username) {

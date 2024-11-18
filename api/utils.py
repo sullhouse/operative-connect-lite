@@ -2,8 +2,17 @@ import re
 import uuid
 import jwt
 from flask import request
-import secrets
 import auth
+from google.cloud import secretmanager
+import os
+
+project_id = os.environ.get('GCP_PROJECT')
+
+def get_secret(secret_id):
+    client = secretmanager.SecretManagerServiceClient()
+    name = f"projects/{project_id}/secrets/{secret_id}/versions/latest"
+    response = client.access_secret_version(name=name)
+    return response.payload.data.decode('UTF-8')
 
 def validate_organization_name(name):
     """Validate organization name format and length"""
@@ -61,45 +70,39 @@ def validate_password(password):
     
     return True, None
 
-def validate_token(token, secret_key):
+def validate_token(token, blacklisted_tokens):
     """Validate JWT token format"""
     if not token or not isinstance(token, str):
         return False, "Token is required and must be a string"
     
+    if token in blacklisted_tokens:
+        return False, "Token has been blacklisted"
+    
     try:
-        jwt.decode(token, secret_key, algorithms=["HS256"])
+        jwt.decode(token, get_secret('SECRET_KEY'), algorithms=["HS256"])
         return True, None
     except jwt.ExpiredSignatureError:
         return False, "Token has expired"
     except jwt.InvalidTokenError:
         return False, "Invalid token format"
 
-def validate_request_data(request):
-    """Validate request data format"""
-    if not hasattr(request, 'get_json'):
-        return None, "Invalid request format"
-    
-    try:
-        data = request.get_json()
-    except Exception as e:
-        return None, f"Invalid JSON format: {str(e)}"
-    
-    if not isinstance(data, dict):
-        return None, "Request body must be a JSON object"
-    
-    return data, None
-
-def get_user_from_token(request, secret_key):
+def get_user_from_token(request):
     """Extract username from authorized token"""
-    if not hasattr(request, 'headers'):
+    if not auth.authorized(request):
         return None
     
-    token = request.headers.get('x-access-token')
+    if hasattr(request, 'headers'):
+        token = request.headers.get('x-access-token')
+    else:
+        headers = request.get('headers', {})
+        token = headers.get('x-access-token')
+    
     if not token or not isinstance(token, str):
         return None
     
     try:
-        data = jwt.decode(token, secret_key, algorithms=["HS256"])
+        secret_key = auth.get_secret('SECRET_KEY')
+        data = auth.jwt.decode(token, secret_key, algorithms=["HS256"])
         username = data.get('username')
         if not username or not isinstance(username, str):
             return None

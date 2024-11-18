@@ -14,3 +14,8 @@ ui/__pycache__
 api/__pycache__/main.cpython-312.pyc
 api/__pycache__/auth.cpython-312.pyc
 .vscode/launch.json
+LOCAL_ENVIRONMENT_VARIABLES.env
+api/debug_local_run.py
+api/__pycache__/secrets.cpython-312.pyc
+debug_local_run.py
+__pycache__/debug_local_run.cpython-312.pyc
