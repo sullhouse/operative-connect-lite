@@ -163,12 +163,13 @@ def map_user_to_organization(request):
     if error:
         return {"message": error}, 400
 
-    org_id = data.get('organization_id')
-    if not org_id:
-        return {"message": "Organization ID is required"}, 400
+    org_name = data.get('organization_name')
+    if not org_name:
+        return {"message": "Organization name is required"}, 400
 
-    # Check if organization exists
-    if not database.check_organizations_exist([org_id]):
+    # Get organization ID from name
+    org_id = database.get_organization_id_by_name(org_name)
+    if not org_id:
         return {"message": "Organization does not exist"}, 400
 
     # Map user to organization

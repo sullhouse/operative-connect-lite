@@ -23,12 +23,16 @@
     "list_partnerships": {
         "required_params": [],
         "optional_params": [],
-        "function": "list_partnerships"
+        "function": "list_partnerships",
+        "api_method": "GET",
+        "api_url": "https://ocl-api.sullhouse.com/organizations/partnerships/list"
     },
     "map_user_to_organization": {
         "required_params": ["username", "organization_id"],
         "optional_params": [],
-        "function": "map_user_to_organization"
+        "function": "map_user_to_organization",
+        "api_method": "POST",
+        "api_url": "https://ocl-api.sullhouse.com/organizations/map_user"
     },
     "unknown": {
         "required_params": [],
