@@ -1,0 +1,38 @@
+{
+    "list_organizations": {
+        "required_params": [],
+        "optional_params": [],
+        "function": "list_organizations",
+        "api_method": "GET",
+        "api_url": "https://ocl-api.sullhouse.com/organizations/list"
+    },
+    "create_organization": {
+        "required_params": ["organization_name"],
+        "optional_params": [],
+        "function": "create_organization",
+        "api_method": "POST",
+        "api_url": "https://ocl-api.sullhouse.com/organizations/create"
+    },
+    "create_partnership": {
+        "required_params": ["demand_org_name", "supply_org_name"],
+        "optional_params": [],
+        "function": "create_partnership",
+        "api_method": "POST",
+        "api_url": "https://ocl-api.sullhouse.com/organizations/partnerships/create"
+    },
+    "list_partnerships": {
+        "required_params": [],
+        "optional_params": [],
+        "function": "list_partnerships"
+    },
+    "map_user_to_organization": {
+        "required_params": ["username", "organization_id"],
+        "optional_params": [],
+        "function": "map_user_to_organization"
+    },
+    "unknown": {
+        "required_params": [],
+        "optional_params": [],
+        "function": "unknown"
+    }
+}

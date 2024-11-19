@@ -1,4 +1,3 @@
-
 from google.cloud import bigquery
 import os
 
@@ -104,3 +103,13 @@ def list_partnerships_for_user(username):
         WHERE uo.username = '{username}'
     """
     return execute_query(query)
+
+def get_organization_id_by_name(org_name):
+    query = f"""
+        SELECT organization_id FROM `{project_id}.organizations.organizations`
+        WHERE organization_name = '{org_name}'
+    """
+    results = execute_query(query)
+    for row in results:
+        return row.organization_id
+    return None

@@ -86,20 +86,19 @@ def create_partnership(request):
     if error:
         return {"message": error}, 400
 
-    demand_org_id = data.get('demand_org_id')
-    supply_org_id = data.get('supply_org_id')
+    demand_org_name = data.get('demand_org_name')
+    supply_org_name = data.get('supply_org_name')
     
-    # Validate organization IDs
+    # Validate organization names
+    if not demand_org_name or not supply_org_name:
+        return {"message": "Both organization names are required"}, 400
+    
+    # Get organization IDs from names
+    demand_org_id = database.get_organization_id_by_name(demand_org_name)
+    supply_org_id = database.get_organization_id_by_name(supply_org_name)
+    
     if not demand_org_id or not supply_org_id:
-        return {"message": "Both organization IDs are required"}, 400
-    
-    is_valid, error = utils.validate_uuid(demand_org_id)
-    if not is_valid:
-        return {"message": f"Invalid demand organization ID: {error}"}, 400
-    
-    is_valid, error = utils.validate_uuid(supply_org_id)
-    if not is_valid:
-        return {"message": f"Invalid supply organization ID: {error}"}, 400
+        return {"message": "One or both organizations do not exist"}, 400
 
     if demand_org_id == supply_org_id:
         return {"message": "Demand and supply organizations must be different"}, 400
@@ -107,10 +106,6 @@ def create_partnership(request):
     # Verify user has access to demand organization
     if not database.check_user_access_to_organization(username, demand_org_id):
         return {"message": "Unauthorized access to demand organization"}, 401
-
-    # Verify both organizations exist
-    if len(database.check_organizations_exist([demand_org_id, supply_org_id])) != 2:
-        return {"message": "One or both organizations do not exist"}, 400
 
     # Check if partnership already exists
     if database.check_partnership_exists(demand_org_id, supply_org_id):
