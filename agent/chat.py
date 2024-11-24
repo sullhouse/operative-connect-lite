@@ -2,6 +2,7 @@ from openai import OpenAI
 import json
 import requests
 
+token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6ImRhbi5icm93bkBleGFtcGxlcGV0c3RvcmUuY29tIiwiZXhwIjoxNzMyNDE0MjM1fQ.NsptPaiNgMo_30Yf-jTHJoWQShtfYAFSvHgrVRscnf8"
 # Load the OpenAI API key from the JSON file
 with open('OpenAI_Operative_Connect_Lite_API_Key.json') as f:
     api_key_data = json.load(f)
@@ -95,13 +96,13 @@ def execute_intent(intent, parameters_dict):
     
     if api_method == "GET":
         headers = {
-            'x-access-token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6ImRhbi5icm93bkBleGFtcGxlcGV0c3RvcmUuY29tIiwiZXhwIjoxNzMxOTkyMDI5fQ.57OCqP7JRjiYEKXtpHhemxwfCCXnxOmNp1vbvNU0zIw'
+            'x-access-token': token
         }
         response = requests.get(api_url, headers=headers, params=parameters_dict)
     else:
         headers = {
             'Content-Type': 'application/json',
-            'x-access-token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6ImRhbi5icm93bkBleGFtcGxlcGV0c3RvcmUuY29tIiwiZXhwIjoxNzMxOTkyMDI5fQ.57OCqP7JRjiYEKXtpHhemxwfCCXnxOmNp1vbvNU0zIw'
+            'x-access-token': token
         }
         response = requests.post(api_url, headers=headers, json=parameters_dict)
     print(beautify_response(response.text))
@@ -125,7 +126,7 @@ def beautify_response(response_text):
 # Test the function
 if __name__ == "__main__":
     user_inputs = [
-        "list my organizations",
+        "list all the partnerships i have access to",
         "create a new organization called OpenAI",
         "what are the partnerships?",
         "map juan@hello.com to OpenAI",
