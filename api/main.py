@@ -10,7 +10,9 @@ import os
 app = Flask(__name__)
 
 # Define allowed origins
-ALLOWED_ORIGINS = ["http://localhost:8000", "http://127.0.0.1:8000", "http://ocl.sullhouse.com"]
+ALLOWED_ORIGINS = os.environ.get('ALLOWED_ORIGINS', 
+    'http://ocl.sullhouse.com,http://localhost:8000,http://127.0.0.1:8000'
+).split(',')
 
 # Configure CORS
 CORS(app, resources={
