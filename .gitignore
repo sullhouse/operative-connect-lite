@@ -20,3 +20,6 @@ api/__pycache__/secrets.cpython-312.pyc
 debug_local_run.py
 __pycache__/debug_local_run.cpython-312.pyc
 OpenAI_Operative_Connect_Lite_API_Key.json
+api/__pycache__/database.cpython-312.pyc
+api/__pycache__/organizations.cpython-312.pyc
+api/__pycache__/utils.cpython-312.pyc
